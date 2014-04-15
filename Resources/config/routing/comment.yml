@@ -1,0 +1,6 @@
+comment_new:
+    pattern:  /{user_url}/{project_url}/comentar
+    defaults: { _controller: ProjectBundle:Comment:new}
+    requirements: { _method: post }
+    options: 
+        sitemap: false

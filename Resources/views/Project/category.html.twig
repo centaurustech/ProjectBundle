@@ -1,0 +1,121 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}Todos los proyectos - {% endblock %}
+{% block description %}{{parent()}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/category.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('bundles/project/css/widget.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/paginator.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+    
+{% block javascript_import %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('js/slideshow.js') }}"></script>
+{% endblock %}
+        
+{% block javascript %}
+    {{ parent() }}
+    $(function(){
+        var $dropdown = $('.dropdown>ul');
+        $('.dropdown>img').attr('src', '/bundles/project/image/arrow_down.png');
+        $('.dropdown>img').attr('src', '/bundles/project/image/arrow_right.png');
+        
+        $dropdown.hide();
+        $('li.dropdown').on('mouseenter', function (evt) {
+                $dropdown.slideDown();
+                $('img', this).attr('src', '/bundles/project/image/arrow_down.png');
+                evt.preventDefault();
+            });
+        $('li.dropdown').on('mouseleave', function (evt){
+                $dropdown.slideUp();
+                $('img', this).attr('src', '/bundles/project/image/arrow_right.png');
+                evt.preventDefault();
+            });
+            
+    });
+{% endblock %}        
+        
+{% block body %}
+    <div class="round_corner sort_box">
+        {% set arrow = sortDirection == 'asc' ? '&uarr;' : '&darr;' %}
+        {% set toggleSortDirection = sortDirection == 'asc' ? 'desc' : 'asc' %}
+        <div class="sortyBy"><span class="title">Ordenar por</span>&emsp;&emsp;|</div>
+        <div class="sortyBy"><a {{ (sortBy == 'alfabetico') ? 'class="underline"' : '' }}                 
+                href="{{ path ('project_category', { 'category': category,
+                                                    'sortBy': 'alfabetico',
+                                                    'sortDirection': sortBy == 'alfabetico' ? toggleSortDirection : 'desc',
+                                                    'page': paginator.page})}}">Alfabético</a> 
+                    <span>{{ (sortBy == 'alfabetico') ? arrow|raw : '' }}</span>&emsp;
+        </div>
+        <div class="sortyBy"><a {{ (sortBy == 'recaudacion') ? 'class="underline"' : '' }} 
+                href="{{ path ('project_category', { 'category': category,
+                                                    'sortBy': 'recaudacion',
+                                                    'sortDirection': sortBy == 'recaudacion' ? toggleSortDirection : 'desc',
+                                                    'page': paginator.page})}}">Recaudación</a> 
+                    <span>{{ (sortBy == 'recaudacion') ? arrow|raw : '' }}</span>&emsp;
+        </div>
+        <div class="sortyBy"><a {{ (sortBy == 'finalizacion') ? 'class="underline"' : '' }}
+                href="{{ path ('project_category', { 'category': category,
+                                                    'sortBy': 'finalizacion',
+                                                    'sortDirection': sortBy == 'finalizacion' ? toggleSortDirection : 'desc',
+                                                    'page': paginator.page})}}">Finalización</a>
+                    <span>{{ (sortBy == 'finalizacion') ? arrow|raw : '' }}</span>
+        </div>                
+    </div>
+    <div class="category_menu">
+        <div class="category_header">
+            <span class="red_title">Categorías</span>
+            <hr>
+        </div>
+        <ul>
+            <li>
+                <a {{ (category == 'novedades') ? 'class="underline"' : '' }} href="{{ path ('project_category', { 'category' : 'novedades'})}}">Novedades</a>
+            </li>
+            <li>
+                <a {{ (category == 'recomendaciones') ? 'class="underline"' : '' }} href="{{ path ('project_category', { 'category': 'recomendaciones'})}}">Recomendaciones</a>
+            </li>
+            <li>
+                <a {{ (category == 'segunda-fase') ? 'class="underline"' : '' }} href="{{ path ('project_category', { 'category': 'segunda-fase'})}}">2ª Fase Recaudación</a>
+            </li>
+            <li>
+                <a {{ (category == 'finalizados_exito') ? 'class="underline"' : '' }} href="{{ path ('project_category', { 'category': 'finalizados-exito'})}}">Finalizados con éxito</a>    
+            </li>
+            <li class="dropdown">
+                Tipo de Obra<img src="{{ asset('bundles/project/image/arrow_right.png') }}" alt="" style="vertical-align: middle">
+                <ul class="round_corner shadow">
+                    {% for db_category in categories_list %}
+                        <li>
+                            <a {{ (category == db_category.url) ? 'class="underline"' : '' }} href="{{ path ('project_category', { 'category': db_category.url })}}">{{ db_category.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="round_corner slidebox shadow">
+        <div id="prev" class="slide_button">
+        </div>
+        <div id="next" class="slide_button">
+        </div>
+        <div id="slider">
+            <div class="slidesContainer">
+                <div class="slide"><img src="{{ asset('bundles/project/image/slide1.jpg') }}" alt="" /></div>
+                <div class="slide"><img src="{{ asset('bundles/project/image/slide2.jpg') }}" alt="" /></div>
+                <div class="slide"><img src="{{ asset('bundles/project/image/slide3.jpg') }}" alt="" /></div>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+    {% for project in projects %}
+        {% include 'ProjectBundle:Project:widget.html.twig' with {'project':project} %}
+    {% else %} 
+        {# @CHECKME 
+            Editar el formato/texto que se mostraría si no existen proyectos aplaudidos
+        #}
+        No hay proyectos en esta categoría y página
+    {% endfor %}
+    {% include '::paginator.html.twig' with {'paginator':paginator} %}
+{% endblock body %}

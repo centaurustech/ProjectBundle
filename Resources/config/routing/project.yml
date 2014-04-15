@@ -1,0 +1,92 @@
+##########
+home_page:
+    pattern:  /
+    defaults: { _controller: ProjectBundle:Project:index }
+    options:
+        sitemap: true
+
+project_new:
+    pattern:  /comenzar-proyecto
+    defaults: { _controller: ProjectBundle:Project:new, project_url: null }
+    options:
+        sitemap: true
+
+project_upload_image:
+    pattern:  /subir_imagen
+    defaults: { _controller: ProjectBundle:Project:uploadImage }
+
+project_applauseBox:
+    pattern:  /aplausometro/{page}
+    defaults: { _controller: ProjectBundle:Project:applauseBox, page: 1 }
+    requirements:
+        page: \d+
+    options:
+        sitemap:
+            priority: 0.6
+
+project_search:
+    pattern:  /buscar/{query}/{page}
+    defaults: { _controller: ProjectBundle:Project:search, query: null, page: 1 }
+    requirements:
+        page: \d+
+    options:
+        sitemap: true
+
+project_category:
+    pattern:  /proyectos/{category}/{sortBy}/{sortDirection}/{page}
+    defaults: { _controller: ProjectBundle:Project:category, category: novedades, sortBy: alfabetico, sortDirection: desc, page: 1}
+    requirements:
+        sortBy: alfabetico|recaudacion|finalizacion
+        sortDirection: asc|desc
+        page: \d+
+    options:
+        sitemap:
+            category:
+                class: ProjectCategory
+                attr: name
+
+UserBundle_user:
+    resource: "@UserBundle/Resources/config/routing/user.yml"
+
+project_edit:
+    pattern:  /{user_url}/{project_url}/editar
+    defaults: { _controller: ProjectBundle:Project:edit }
+
+project_follow:
+    pattern:  /{user_url}/{project_url}/seguir
+    defaults: { _controller: ProjectBundle:Follow:follow}
+
+project_unfollow:
+    pattern:  /{user_url}/{project_url}/noseguir
+    defaults: { _controller: ProjectBundle:Follow:unfollow}
+
+project_giveApplause:
+    pattern:  /{user_url}/{project_url}/aplaudir
+    defaults: { _controller: ProjectBundle:Project:giveAppaluse}
+
+project_showSupport:
+    pattern:  /{user_url}/{project_url}/apoyar/{reward_id}
+    defaults: { _controller: ProjectBundle:Support:showSupport, reward_id: null }
+    options:
+        sitemap: 
+            priority: 0.6
+        
+project_confirmSupport:
+    pattern:  /{user_url}/{project_url}/confirmar
+    defaults: { _controller: confirm_support:confirmSupport}
+    requirements: { _method: post }
+
+project_support_ok:
+    pattern:  /{user_url}/{project_url}/apoyo-ok
+    defaults: { _controller: "ProjectBundle:Support:okSupport" }
+
+project_support_ko:
+    pattern:  /{user_url}/{project_url}/apoyo-ko
+    defaults: { _controller: "ProjectBundle:Support:koSupport" }
+
+project_show:
+    pattern:  /{user_url}/{project_url}
+    defaults: { _controller: ProjectBundle:Project:show }
+    options:
+        sitemap: 
+            priority: 0.8

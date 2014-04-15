@@ -1,0 +1,48 @@
+# src/Crearock/ProjectBundle/Resources/config/validation.yml
+Crearock\ProjectBundle\Entity\Project:
+    constraints:
+        - Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity: { fields: title, message: 'Ya existe un proyecto con este título.' }
+    properties:
+        image:
+            - NotBlank: { message: 'Debes seleccionar una imagen para tu proyecto.' }
+        title:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - MaxLength: { limit: 55 , message: 'Este campo debe contener como máximo {{ limit }} carácteres.' }
+        resume:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - MaxLength: { limit: 150 , message: 'Este campo debe contener como máximo {{ limit }} carácteres.' }
+        description:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+        vurl:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - MaxLength: { limit: 10 , message: 'Este campo debe contener como máximo {{ limit }} carácteres.' }
+        amount:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - Min: { limit: 0, message: 'Debe introducir una cantidad mayor que {{ limit }}.', invalidMessage: 'Debe introducir un valor numérico.'}
+            - MaxLength: { limit: 11, message: 'Este campo debe contener como máximo {{ limit }} dígitos.' }
+        days:
+            - Min: { limit: 1, message: 'Debe introducir un número mayor que {{ limit }}.', invalidMessage: 'Debe introducir un valor numérico.'}
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+        category:
+            - NotBlank: { message: 'Debes seleccionar una categoría.' }
+
+Crearock\ProjectBundle\Entity\Reward:
+    properties:
+        amount:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - Min: { limit: 0, message: 'Debe introducir una cantidad mayor que {{ limit }}.', invalidMessage: 'Debe introducir un valor numérico.'}
+            - MaxLength: { limit: 11, message: 'Este campo debe contener como máximo {{ limit }} dígitos.' }
+        title:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - MaxLength: { limit: 55 , message: 'Este campo debe contener como máximo {{ limit }} carácteres.' }
+        description:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+            - MaxLength: { limit: 500, message: 'Este campo debe contener como máximo {{ limit }} carácteres.' }
+        max_units:
+            - Min: { limit: 0, message: 'Debe introducir una cantidad mayor o igual que {{ limit }}.', invalidMessage: 'Debe introducir un valor numérico.'}
+#            - MaxLength: { limit: 4, message: 'Este campo debe contener como máximo {{ limit }} dígitos.' }
+Crearock\ProjectBundle\Entity\Comment:
+    properties:
+        comment:
+            - NotBlank: { message: 'Este campo no puede estar vacío.' }
+#            - MaxLength: { limit: 255, message: 'Este campo debe contener como máximo {{ limit }} carácteres.' }

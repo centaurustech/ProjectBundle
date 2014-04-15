@@ -1,0 +1,24 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}Aplausómetro - {% endblock %}
+{% block description %}{{parent()}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/widget.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/paginator.css') }}" type="text/css" rel="stylesheet" />
+    
+{% endblock %} 
+        
+{% block body %}
+    {% for project in projects %}
+        {% include 'ProjectBundle:Project:widget.html.twig' with {'project':project} %}
+    {% else %} 
+        {# @CHECKME 
+            Editar el formato/texto que se mostraría si no existen proyectos aplaudidos
+        #}
+        No hay proyectos en esta categoría y página
+    {% endfor %}
+    {% include '::paginator.html.twig' with {'paginator':paginator} %}
+{% endblock body %}

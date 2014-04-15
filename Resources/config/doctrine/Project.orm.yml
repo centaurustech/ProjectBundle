@@ -1,0 +1,65 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/Project.orm.yml
+Crearock\ProjectBundle\Entity\Project:
+    type: entity
+    table: project
+    repositoryClass: Crearock\ProjectBundle\Repository\ProjectRepository
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        title:
+            type: string
+            length: 55
+            unique: true
+        image:
+            type: string
+            length: 60
+        resume:
+            type: string
+            length: 150
+        description:
+            type: text
+            nullable: true
+        vurl:
+            type: string
+            length: 10
+        aurl:
+            type: string
+            length: 255
+            nullable: true
+        amount:
+            type: integer
+            length: 5
+        applause:
+            type: integer
+            length: 5
+        created_at:
+            type: datetime
+        start_fund_at:
+            type: datetime
+            nullable: true
+        days:
+            type: integer
+            length: 3
+        extended_at:
+            type: datetime
+            nullable: true
+        url:
+            type: string
+            length: 55
+            unique: true
+        status:
+            type: smallint          
+    oneToMany:
+        rewards:
+            targetEntity: Crearock\ProjectBundle\Entity\Reward
+            mappedBy: project
+            cascade: [persist]
+    manyToOne:
+        user:
+            targetEntity: Crearock\UserBundle\Entity\User
+        category:
+            targetEntity: ProjectCategory
+            

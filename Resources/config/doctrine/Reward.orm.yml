@@ -1,0 +1,29 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/Reward.orm.yml
+Crearock\ProjectBundle\Entity\Reward:
+    type: entity
+    table: reward
+    repositoryClass: Crearock\ProjectBundle\Repository\ProjectRepository
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        amount:
+            type: integer
+        title:
+            type: string
+            length: 55
+        description:
+            type: text
+            columnDefinition: VARCHAR(500) NOT NULL
+        max_units:
+            type: integer
+            nullable: true
+        units:
+            type: integer
+            columnDefinition: INT DEFAULT 0
+    manyToOne:
+        project:
+            targetEntity: Crearock\ProjectBundle\Entity\Project
+            inversedBy: rewards

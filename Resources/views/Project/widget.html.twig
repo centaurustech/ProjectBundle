@@ -1,0 +1,102 @@
+<a class="widget shadow" href="{{ path('project_show', {  'user_url' : project.user_url,
+                                                    'project_url' : project.url}) }}">
+    <div class="img_project">
+        <img src="{{ asset( g_project.upload_dir ~ 'thumb/' ~ project.image ) }}" alt="">
+        <div class="shadow"></div>
+        <div class="username">{{ project.username }}</div>
+    </div>
+    <div class="widget_text">
+        <span class="title">{{ project.title }}</span><br>
+        {{ project.resume }}
+    </div>
+    <div class="fund_info red_gradient" 
+                {% if applause|default(false) == true %}                
+                    style="height: 92px;"
+                {% endif %}>
+        {% if project.status == 1 or applause|default(false) == true %}                
+            {% if applause|default(false) != true %}
+            <div class="percent 
+                {% if project.status not in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED'), constant('Crearock\\ProjectBundle\\Entity\\Project::EXTENDED')] %}                
+                     less_content
+                {% endif %}">
+                <div class="progress_bar">
+                    {% if (project.applauded_percent is defined)
+                            and (project.applauded_percent > 0)
+                            and (project.applauded_percent <= 100) %}
+                        {% set progressBarValue = project.applauded_percent %}
+                    {% elseif (project.applauded_percent is defined) 
+                            and (project.applauded_percent > 100) %}
+                        {% set progressBarValue = 100 %}
+                    {% else %}
+                        {% set progressBarValue = 0 %}
+                    {% endif %}
+                    <div class="value" style="width:{{ progressBarValue ~ '%' }}"></div>
+                </div>
+                <span>{{ (project.applauded_percent != NULL) ? project.applauded_percent : 0 }} %</span>
+            </div>
+            {% endif %}
+            <div class="amount_info">                    
+                <img src="{{ asset('image/icons/star1.png') }}" alt="Estrella">                
+                {% if applause|default(false) == true %}                
+                    <br>
+                {% endif %}
+                <span>Aplausos: {{ project.applause }}</span>
+            </div>
+            {% if applause|default(false) != true %}
+            <div>
+                Faltan {{ (project.applause_left < 0) ? 0 : project.applause_left }} para activar
+            </div>
+            {% endif %}
+        {% else %}
+            {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}
+                <span>Fase inicial</span>
+            {% elseif (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::EXTENDED')]) %}
+                <span>Segunda fase</span>
+            {% endif %}
+            <div class="percent
+                {% if project.status not in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED'), constant('Crearock\\ProjectBundle\\Entity\\Project::EXTENDED')] %}                
+                     less_content
+                {% endif %}">
+                <div class="progress_bar">
+                    {% if (project.supported_percent is defined)
+                            and (project.supported_percent > 0)
+                            and (project.supported_percent <= 100) %}
+                        {% set progressBarValue = project.supported_percent %}
+                    {% elseif (project.supported_percent is defined) 
+                            and (project.supported_percent > 100) %}
+                        {% set progressBarValue = 100 %}
+                    {% else %}
+                        {% set progressBarValue = 0 %}
+                    {% endif %}
+                    <div class="value" style="width:{{ progressBarValue ~ '%' }}"></div>
+                </div>
+                <span>{{ (project.supported_percent != NULL) ? project.supported_percent : 0 }} %</span>
+            </div>
+            <div class="amount_info">                
+                <img src="{{ asset('image/icons/calc.png') }}" alt="">
+                {{ (project.supported_amount != NULL) ? project.supported_amount : 0 }} € de 
+                {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}
+                    {{ (project.required_amount * 0.66)|number_format(0,',','') }}
+                {% else %}
+                    {{ project.required_amount }}
+                {% endif %} €
+            </div>
+            <div class="days_left">                                
+                <img src="{{ asset('image/icons/clock.png') }}" alt="">
+                {% if (project.days_left > 1) %}    
+                    {{ project.days_left }} días restantes
+                {% elseif (project.days_left) == 1 %}
+                    Último día
+                {% elseif (project.days_left < 1 and project.status == 3) %}
+                    Decidiendo
+                {% else %}
+                    Finalizado
+                {% endif %}
+            </div>
+            {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}             
+                <span>Objetivo total {{ project.required_amount }} €</span>
+            {% endif %}
+        {% endif %}
+    </div>
+
+</a>

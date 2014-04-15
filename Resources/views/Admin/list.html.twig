@@ -1,0 +1,104 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}Administracion de Proyectos - {% endblock %}
+{% block description %}{{parent()}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block body %}
+    <div class="page_info">
+        <h2>Lista de proyectos</h2>
+    </div>
+    <hr>
+    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%">
+        <tr style="font-weight: bold; text-decoration: underline">
+            <td>
+                Id
+            </td>
+            <td>
+                Titulo
+            </td>
+            <td>
+                Fecha creación
+            </td>
+            <td>
+                Estado
+            </td>
+            <td>
+                Accion
+            </td>
+        </tr>
+        {% for project in projects %}
+            <tr>
+                <td>
+                    {{ project.id }}
+                </td>
+                <td>
+                    {{ project.title }}
+                </td>
+                <td>
+                    {{ project.createdAt|date("d/m/Y H:i:s") }}
+                </td>
+                <td>
+                    {% if (project.status == 0) %}
+                        0 - En revision
+                    {% elseif(project.status == 1) %}
+                        1 - En aplausometro
+                    {% elseif(project.status == 2) %}
+                        2 - Recaudando
+                    {% elseif(project.status == 3) %}
+                        3 - Decidiendo
+                    {% elseif(project.status == 4) %}
+                        4 - Prorrogado
+                    {% elseif(project.status == 5) %}
+                        5 - Finalizado con éxito
+                    {% elseif(project.status == 6) %}
+                        6 - Finalizado sin éxito                                            
+                    {% endif %}
+                </td>
+                <td>
+                    {# Icono editar #}                    
+                    <a href="{{ path('project_edit', { 'user_url' : project.user.url, 'project_url': project.url }) }}">
+                        <img src="{{ asset('image/edit.gif') }}" alt="editar" title="Editar">
+                    </a>
+                    {# Icono Mostrar #}
+                    <a href="{{ path('project_show', { 'user_url' : project.user.url, 'project_url': project.url }) }}">
+                        <img src="{{ asset('image/go.png') }}" style="width: 34px;" alt="ver" title="Ver">
+                    </a>
+                    {# Icono Comenzar #}
+                    {% if (project.status == 0) %}
+                    <a href="{{ path('project_manage', { 'user_url' : project.user.url, 'project_url': project.url, 'action': 'activar' }) }}">
+                    {% endif %}
+                        {% set image = (project.status != 0) ? 'start_off.png' : 'start.png' %}
+                        <img src="{{ asset('image/' ~ image) }}" style="width: 34px;" alt="empezar" title="Empezar">
+                    {% if (project.status == 0) %}    
+                    </a>
+                    {% endif %}
+                    {# Icono Finalizar #}
+                    {% if (project.status == 3) %}
+                    <a href="{{ path('project_manage', { 'user_url' : project.user.url, 'project_url': project.url, 'action': 'finalizar' }) }}">
+                    {% endif %}
+                        {% set image = (project.status != 3) ? 'stop_off.png' : 'stop.png' %}
+                        <img src="{{ asset('image/' ~ image) }}" style="width: 34px;" alt="finalizar" title="Finalizar">
+                    {% if (project.status == 3) %}    
+                    </a>
+                    {% endif %}
+                    {# Icono Prorrogar #}    
+                    {% if (project.status == 3) %}
+                    <a href="{{ path('project_manage', { 'user_url' : project.user.url, 'project_url': project.url, 'action': 'prorrogar' }) }}">
+                    {% endif %}
+                        {% set image = (project.status != 3) ? 'extend_off.png' : 'extend.png' %}
+                        <img src="{{ asset('image/' ~ image) }}" style="width: 34px;" alt="prorrogar" title="Prorrogar">
+                    {% if (project.status == 3) %}    
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">
+                    No hay proyectos
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock body %}

@@ -1,0 +1,225 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}{{ (action == 'new') ? 'Comenzar Proyecto - ' : 'Editando ' ~ project.title ~ ' - ' }}{% endblock %}
+{% block description %}{{parent()}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/new.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('bundles/project/css/reward.css') }}" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/jquery.Jcrop.css') }}" type="text/css" />
+{% endblock %}
+
+{% block javascript_import %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('js/vendor/fileUploader/jquery.iframe-transport.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/vendor/fileUploader/jquery.fileupload.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/vendor/jcrop/jquery.jCrop.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/project/js/new.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/charCounter.jquery.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/vendor/tiny_mce/tiny_mce.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/vendor/jquery.autosize-min.js') }}"></script>
+{% endblock javascript_import %}
+        
+{% block body %}
+    <div class="page_info">
+        <h3>Envía una propuesta para arrancar la campaña de Crowdfunding</h3>
+    </div>
+    <hr>    
+    <form action="{{ (action == 'new') ? 
+                            path('project_new') :
+                            path('project_edit', {'user_url' : project.user.url, 'project_url' : project.url} )
+                }}" method="POST" style="" {{ form_enctype(form) }}>
+        <table id="new_project" >
+            <tr>
+                <td>
+                    {{ form_label(form.image) }}<br>
+{# @CHECKME
+    Comprobar que el label corresponde con el tamaño de la imagen a subir
+#}
+                    <div class="label_description">(El tamaño de la imagen debe ser de 400 píxeles de ancho por 300 píxeles de alto)</div>
+                </td>
+                <td>
+{#@CHECKME
+    Comprobar tamaño, alto y ancho del archivo a subir
+#}
+                    {% set image = (form.vars.value.image is not empty) ? 
+                            ((action == 'new') ? 
+                                g_project.temp_dir ~ 'thumb/' ~ form.vars.value.image :
+                                g_project.upload_dir ~ 'thumb/' ~ form.vars.value.image)
+                            :
+                            'image/nopicture.png'
+                    %}
+                    <img id="image" src="{{ asset(image) }}"
+                         height="135" width="195" style="display: block; clear: both; margin: 0 auto 15px;">
+                    <span id="fileUploadInfo" class="error" style="width: 70%; margin: 10px auto;">{{ form_errors(form.image) }}</span>                   
+                    <span class="file-wrapper">
+                        <input type="file" name="image" id="fileUpload" title="Seleccionar"/>
+                        <span class="button">Seleccionar</span>
+                    </span>
+                    
+                    {{ form_widget(form.image) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.title) }}
+                    <div class="label_description">El título de tu proyecto. Puedes usar conceptos como: "Gira de <i>nombre</i> 2012" o "Videoclip de <i>nombre</i>"</div>
+                </td>
+                <td>
+                    {{ form_widget(form.title) }}
+                    {{ form_errors(form.title) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.category) }}
+                </td>
+                <td>
+                    {{ form_widget(form.category) }}
+                    {{ form_errors(form.category) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.days) }}
+                </td>
+                <td>
+                    {{ form_widget(form.days) }}
+                    {{ form_errors(form.days) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.amount) }}
+                </td>
+                <td>
+                    {{ form_widget(form.amount) }}
+                    {{ form_errors(form.amount) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.resume) }}
+                    <div class="label_description">Máximo 150 caracteres</div>
+                </td>
+                <td>
+                    {{ form_widget(form.resume, { 'attr' : { 'class' : 'count' } } ) }}
+                    {{ form_errors(form.resume) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.description) }}
+                </td>
+                <td>
+                    {{ form_widget(form.description) }}
+                    {{ form_errors(form.description) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.vurl) }}
+                        <div class="label_description">El vídeo de tu proyecto. Súbelo a 
+                            <a href="http://www.vimeo.com" target="_blank" title="Sube tu vídeo a vimeo">vimeo</a> y pega aquí el código para completar el enlace.</div>
+                </td>
+                <td class="url_code">
+                    http://vimeo.com/{{ form_widget(form.vurl) }}
+                    {{ form_errors(form.vurl) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.aurl) }}
+                        <div class="label_description">El audio para tu proyecto es opcional. Publícalo en  
+                            <a href="http://www.soundcloud.com" target="_blank" title="Publica el audio en soundcloud">soundcloud</a> y pega aquí la url completa del audio, es un enlace como este: <i>http://soundcloud.com/banda/tema</i></div>
+                </td>
+                <td>
+                    {{ form_widget(form.aurl) }}
+                    {{ form_errors(form.aurl) }}
+                </td>
+            </tr>
+        {% if (action == 'edit')  %}
+            <tr>
+                <td>
+                    {{ form_label(form.created_at) }}
+                </td>
+                <td>
+                    {{ form_widget(form.created_at) }}
+                    {{ form_errors(form.created_at) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.start_fund_at) }}
+                </td>
+                <td>
+                    {{ form_widget(form.start_fund_at) }}
+                    {{ form_errors(form.start_fund_at) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.extended_at) }}
+                </td>
+                <td>
+                    {{ form_widget(form.extended_at) }}
+                    {{ form_errors(form.extended_at) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.applause) }}
+                </td>
+                <td>
+                    {{ form_widget(form.applause) }}
+                    {{ form_errors(form.applause) }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {{ form_label(form.status) }}
+                    <div class="label_description">
+                        (0 = En revision; 
+                        1 = En aplausometro; 
+                        2 = Recaudando; 
+                        3 = Decidiendo; 
+                        4 = Prorrogado; 
+                        5 = Finalizado con éxito;
+                        6 = Finalizado sin éxito)
+                    </div>
+                </td>
+                <td>
+                    {{ form_widget(form.status) }}
+                    {{ form_errors(form.status) }}
+                </td>
+            </tr>    
+        {% endif %}
+        </table>
+                
+        <div id="bubble">Lee la<br> <strong>Guía del Artista</strong><br> para<br> empezar un proyecto</div>
+        <div id="crguide" class="red_gradient round_corner_4px shadow">
+            <a  target="_blank" href="{{ asset('pdf/guia-musico.pdf') }}" title="Descarga la guía Crea Rock para artistas">
+                Descarga la<br><strong>Guía<br> Crea Rock<br></strong> para<br> <strong>Artistas</strong>
+                <img src="{{ asset('image/cr.png') }}" alt="Crea Rock">
+            </a>
+        </div>
+        {% include 'ProjectBundle:Project:rewards.html.twig' %}
+            
+        {% if (action == 'new') %}
+            <div style="text-align: center; width: 100%">
+                {{ form_widget(form.terms) }} Acepto los <a href="{{ path('terms_use') }}" title="Términos de uso" target="_blank" style="color: red">Términos de uso</a>
+                {{ form_errors(form.terms) }}
+            </div>
+        {% endif %}
+        {{ form_widget(form._token) }}
+        {{ form_errors(form) }}
+        <div style="text-align: center;  width: 100%">    
+            {% if (action != 'new') %}
+                <a href="{{ path ('project_list') }}" class="button grey_gradient">Cancelar</a>
+            {% endif %}
+            <input type="submit" value="{{ (action == 'new') ? 'Enviar proyecto' : 'Guardar Cambios' }}" class="button red_gradient" style="margin-top: 20px">
+        </div>
+    </form>
+{% endblock body %}

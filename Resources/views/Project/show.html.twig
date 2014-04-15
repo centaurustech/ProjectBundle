@@ -1,0 +1,268 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}{{ project.username }}, {{ project.title}} - {% endblock %}
+{% block description %}Mira el proyecto de {{ project.username }}: {{ project.title}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/show.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('bundles/project/css/comment.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block javascript_import %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('bundles/project/js/show.js') }}"></script> 
+    <script type="text/javascript" src="{{ asset('js/vendor/jquery.autosize-min.js') }}"></script>
+{% endblock javascript_import %}
+    
+{% block javascript %}
+    {{ parent() }}
+    {% if (project.audio != '' ) %}
+    $(function (){
+        $.getJSON('http://soundcloud.com/oembed?callback=?', {format: 'js', url: '{{ project.audio }}', iframe: true, color: 'ff0011' },
+        function(data) {
+            $('#audio').html(data.html);
+        });
+    });
+    {% endif %}    
+    $('.autoresize').autosize(); 
+{% endblock %}
+    
+{% block body %}
+    <div class="page_info">
+        <h2>
+            <a href="{{ path('project_show', {  'user_url' : project.user_url,
+                                                    'project_url' : project.url}) }}">
+                {{ project.title }}
+            </a>
+        </h2>
+        <h4><a href="{{ path('project_category', 
+                                            { 'category' : project.category_url }) }}">
+                {{ project.category_name }}
+            </a>
+        </h4>
+    </div>
+    <div class="admin_actions">
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('project_edit', { 'user_url' : project.user_url, 'project_url' : project.url }) }}">
+                <img src="{{ asset('image/edit.gif') }}" alt="editar" title="Editar">
+            </a>
+            {% if (project.status == 0) %}
+            <a href="{{ path('project_activate', { 'user_url' : project.user_url, 'project_url': project.url }) }}">
+            {% endif %}
+                {% set image = (project.status != 0) ? 'start_off.png' : 'start.png' %}
+                <img src="{{ asset('image/' ~ image) }}" style="width: 34px;" alt="empezar" title="Empezar">
+            {% if (project.status == 0) %}    
+            </a>
+            {% endif %}
+            {% if (project.status == 3) %}
+            <a href="{{ path('project_extend', { 'user_url' : project.user_url, 'project_url': project.url }) }}">
+            {% endif %}
+                {% set image = (project.status != 3) ? 'extend_off.png' : 'extend.png' %}
+                <img src="{{ asset('image/' ~ image) }}" style="width: 34px;" alt="Prorrogar" title="Prorrogar">
+            {% if (project.status == 3) %}    
+            </a>
+            {% endif %}
+        {% endif %}
+    </div>
+    <hr>
+    <div id="wrap_project">
+        <div class="project">
+            <div id="status" class="round_corner">
+                {{ project.status_message }}
+            </div>
+            <div id="video" class="round_corner shadow">
+                <iframe src="http://player.vimeo.com/video/{{ project.video }}?title=0&amp;byline=0&amp;portrait=0&amp;color=ff000d" width="620" height="349" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+            </div>
+            <div id="audio">
+            </div>
+            <div id="project_actions">
+                {% if (not project.following) %}
+                    {% set path = path ('project_follow', { 'user_url': project.user_url,
+                                                            'project_url': project.url}) %}
+                    {% set text = 'Seguir Proyecto' %}
+                {% else %}
+                    {% set path = path ('project_unfollow', { 'user_url': project.user_url,
+                                                            'project_url': project.url}) %}
+                    {% set text = 'Dejar de Seguir' %}
+                {% endif %}
+                {#% if (not project.ended) %#}
+                    <a href="{{ path }}"
+                        class="button red_gradient authentication">
+                        {{ text }}
+                    </a>
+                {#% else %}
+                    <div class="button unabled_gradient" style="display: inline">
+                        {{ text }}
+                    </div>
+                {% endif %#}
+                <div id="share"> 
+                    Comparte este proyecto: 
+                    <!-- AddThis Button BEGIN -->
+                    <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+                        <a title="Comparte este proyecto en Facebook" class="addthis_button_facebook"></a>
+                        <a title="Twitea este proyecto" class="addthis_button_twitter"></a>
+                        <a title="Comparte este proyecto en Google" class="addthis_button_google"></a>
+                        <a title="Comparte este proyecto en Tuenti" class="addthis_button_tuenti"></a>
+                        <a title="Envía este proyecto por email" class="addthis_button_email"></a>
+                        <a class="addthis_button_compact"></a>
+                    </div>
+                    <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=xa-504e450a03e0871b"></script>
+                    <!-- AddThis Button END -->
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="tabs">
+                <ul>
+                    <li><a href="#descripcion">Descripción</a></li>
+                    <li><a href="#comentarios">Comentarios</a></li>
+                </ul>
+                <div id="descripcion">
+                {% autoescape false %}
+                    {{ project.description }}
+                {% endautoescape %}   
+                </div>
+                {% include 'ProjectBundle:Comment:comment.html.twig' with { 'comments': project.comments, 'project.new_comment': project.new_comment_form} %}
+            </div>
+        </div>
+
+        <div class="sideBar">
+            {# Abre el div o el enlace según lo haya aplaudido o no el usuario #}
+            {% if project.applauded %}
+                <div class="box_info red_gradient round_corner">                        
+            {% else %}
+                <a href="{{ path ('project_giveApplause', {'user_url': project.user_url,
+                                                                'project_url': project.url}) }}"
+                    class="box_info red_gradient round_corner authentication">
+            {% endif %}
+            {# ESTRELLITA #}
+            <img src="{{ asset('image/icons/star1.png') }}" alt="Estrella"><br>
+            {# Muestra si el usuario lo ha aplaudido #}
+            {% if (project.applauded) %}
+                <span>¡Ya lo has aplaudido!</span>
+            {% else %}
+                <span>Aplaudir</span>
+            {% endif %}
+            <div style="font-weight: 
+                        bold; font-size: 20px;    
+                        position: relative;
+                        top: 5px;">Aplausos: {{ project.applause }}</div>
+            {# Cierra el div o el enlace según lo haya aplaudido o no el usuario #}
+            {% if project.applauded %}
+                </div>
+            {% else %}
+                </a>
+            {% endif %}                         
+            <div class="box_info red_gradient round_corner">
+            {# Saca las estadísticas del aplausómetro #} 
+            {% if (project.status == 1) %}  
+                Aplausómetro: {{ project.applause_percent }}%
+                <div class="percent">
+                    <div class="progress_bar">
+                        {% if (project.applause_percent is defined)
+                                and (project.applause_percent > 0)
+                                and (project.applause_percent <= 100) %}
+                            {% set progressBarValue = project.applause_percent %}
+                        {% elseif (project.applause_percent is defined) 
+                                and (project.applause_percent > 100) %}
+                            {% set progressBarValue = 100 %}
+                        {% else %}
+                            {% set progressBarValue = 0 %}
+                        {% endif %}
+                        <div class="value" style="width:{{ progressBarValue ~ '%'}}">
+                        </div>
+                    </div>
+                </div>
+                <div class="applause_info" style="font-size: 12px;">
+                    <span>Aplausos: {{ project.applause }}&emsp;
+                        Faltan: {{ (project.applause_left < 0) ? 0 : project.applause_left }}
+                    </span>
+                </div>
+            {% else %}
+                    {# Saca las estadísticas de las recompensas  #} 
+                    {% if (project.rewards is defined) %}
+                        {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}
+                            <span>Fase inicial</span>
+                        {% elseif (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::EXTENDED')]) %}
+                            <span>Segunda fase</span>
+                        {% endif %}
+                        Recaudado: {{ (project.supported_percent) ? project.supported_percent : 0 }}%
+                        <div class="percent">
+                            <div class="progress_bar">
+                                {% if (project.supported_percent is defined)
+                                        and (project.supported_percent > 0)
+                                        and (project.supported_percent <= 100) %}
+                                    {% set progressBarValue = project.supported_percent %}
+                                {% elseif (project.supported_percent is defined) 
+                                        and (project.supported_percent > 100) %}
+                                    {% set progressBarValue = 100 %}
+                                {% else %}
+                                    {% set progressBarValue = 0 %}
+                                {% endif %}
+                                <div class="value" style="width:{{ progressBarValue ~ '%' }}"></div>
+                            </div>
+                        </div>
+                        <img src="{{ asset('image/icons/calc.png') }}" alt="" style="height: 16px;">
+                        {{ (project.supported_amount) ? project.supported_amount : 0 }} € de 
+                        {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}
+                            {{ (project.required_amount * 0.66)|number_format(0,',','') }}
+                        {% else %}
+                            {{ project.required_amount }}
+                        {% endif %} €
+                        <br>
+                        <img src="{{ asset('image/icons/clock.png') }}" alt="" style="height: 16px;">
+                        {% if (project.days_left > 1) %}    
+                            {{ project.days_left }} dias restantes
+                        {% elseif (project.days_left) == 1 %}
+                            Último día
+                        {% elseif (project.days_left) < 1 %}
+                            Finalizado
+                        {% endif %}
+                        {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}             
+                            <span style="margin-top: 12px; display: block;">Objetivo total {{ project.required_amount }} €</span>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+            <a id="autor" class="round_corner grey_gradient" href="{{ path ('user_show', {'user_url': project.user_url}) }}"
+                title="Ver perfil de {{ project.username }}">Autor: {{ project.username }}</a>
+            {% if project.rewards is defined %}
+                <div id="wrap_rewards">
+                    <span class="red_title">Recompensas</span>
+                    <hr>
+                    {% for reward in project.rewards %}
+                        <div class="reward round_corner">
+                            <div style="display: inline-block; width: 100%">
+                                <div class="amount">{{ reward.amount }} € </div>
+                                {% if project.disabled or 
+                                    ( ( reward.maxUnits > 0 ) and 
+                                    ( reward.units >= reward.maxUnits ) ) %}
+                                    <div style="cursor: auto;" class="button unabled_gradient" style="margin: 10px 10px 0 0;">Apoyar</div>
+                                {% else %}
+                                    <a href="{{ path ('project_showSupport', {'user_url': project.user_url,
+                                                        'project_url': project.url,
+                                                        'reward_id': reward.id}) }}" 
+                                        class="button red_gradient">Apoyar</a>
+                                {% endif %}
+                            </div>
+                                <a class="title" title="Mostrar descripción" href="#">{{ reward.title }}</a>
+                                <div class="description">
+                                    {{ reward.description }}
+                                </div>
+                            <hr style="width: 83%; height: 1px; border:0;">
+                            <div class="support_info">
+                                {{ reward.units|default(0) }} mecenas {{ reward.units == 1 ? 'ha' : 'han' }} apoyado ya
+                                {% if (reward.maxUnits) > 0 %}
+                                    <img alt="Alert" src="{{ asset('bundles/project/image/alert.jpg') }}" 
+                                            title="¡Unidades limitadas para esta recompensa!" style="height: 20px; cursor: help;">
+                                    Quedan: <span style="color: red; font-size: 26px; vertical-align: sub">{{ reward.maxUnits - reward.units }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

@@ -1,0 +1,11 @@
+ProjectBundle_admin:
+    resource: "@ProjectBundle/Resources/config/routing/admin.yml"
+    prefix: /admin
+    
+ProjectBundle_project:
+    resource: "@ProjectBundle/Resources/config/routing/project.yml"
+    prefix: /
+    
+ProjectBundle_comment:
+    resource: "@ProjectBundle/Resources/config/routing/comment.yml"
+    prefix: /

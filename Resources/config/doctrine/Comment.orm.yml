@@ -1,0 +1,25 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/Comment.orm.yml
+Crearock\ProjectBundle\Entity\Comment:
+    type: entity
+    table: comment
+    repositoryClass: Crearock\ProjectBundle\Repository\CommentRepository
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: NONE
+        user:
+            associationKey: true
+        project:
+            associationKey: true
+    fields:
+        comment:
+            type: text
+            columnDefinition: TEXT NOT NULL
+        created_at:
+            type: datetime
+    manyToOne:
+        user:
+            targetEntity: Crearock\UserBundle\Entity\User
+        project:
+            targetEntity: Project

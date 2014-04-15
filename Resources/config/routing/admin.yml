@@ -1,0 +1,7 @@
+project_list:
+    pattern:  /proyectos
+    defaults: { _controller: ProjectBundle:Admin:list }
+
+project_manage:
+    pattern:  /{user_url}/{project_url}/{action}
+    defaults: { _controller: ProjectBundle:Admin:manage }

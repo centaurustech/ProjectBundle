@@ -1,0 +1,17 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/Follow.orm.yml
+Crearock\ProjectBundle\Entity\Follow:
+    type: entity
+    table: follow
+    id:
+        user:
+            associationKey: true
+        project:
+            associationKey: true
+    fields:
+        created_at:
+            type: datetime
+    manyToOne:
+        user:
+            targetEntity: Crearock\UserBundle\Entity\User
+        project:
+            targetEntity: Project

@@ -1,0 +1,165 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}Crowdfunding para músicos - {% endblock %}
+{% block description %}Crea Rock, crowdfunding para músicos ¿A qué esperas para iniciar tu proyecto musical?{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/home.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('bundles/project/css/widget.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block javascript_import %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('js/slideshow.js') }}"></script>
+{% endblock %}    
+    
+{% block body %}
+    <div id="top_projects" class="round_corner shadow">
+        {% if (slide|length > 1) %}
+        <div id="prev" class="slide_button">
+        </div>
+        <div id="next" class="slide_button">
+        </div>
+        {% endif %}
+        <div id="slider">
+            <div class="slidesContainer">
+            {% for project in slide %}
+                <div class="slide">
+                    <img src="{{ asset(g_project.upload_dir ~ project.image) }}" alt="{{ project.title }}" style="
+                        height: 300px;
+                        width: 400px;
+                    "/>
+                    <div class="project_shadow round_corner"><span>{{ project.title }}<br>
+                            De: <b style="color: red;">{{ project.username }}</b></span></div>
+                    <div class="ranking_info">
+                        <img src="{{ asset('image/icons/star1.png') }}" alt="Estrella">
+                        <img src="{{ asset('image/icons/star1.png') }}" alt="Estrella">
+                        <img src="{{ asset('image/icons/star1.png') }}" alt="Estrella">
+                        <div>{{ project.ranking_message }}</div>
+                    </div>
+                    <div class="fund_info red_gradient">
+                        <a id="support_button" class="round_corner" 
+                            href="{{ path('project_show', {  'user_url' : project.user_url, 'project_url' : project.url}) }}">
+                            APOYA ESTE PROYECTO
+                        </a>
+                        
+                            {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}
+                            <div style="width: 60%;" >
+                                <span>Fase inicial - Objetivo total {{ project.required_amount }} €</span>
+                            {% elseif (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::EXTENDED')]) %}
+                            <div style="width: 60%;" >
+                                <span>Segunda fase</span>
+                            {% else %}
+                                <div style="width: 60%; margin-top: 27px;" >
+                            {% endif %}
+                            <div class="percent">
+                                <div class="progress_bar">
+                                    {% if (project.supported_percent is defined)
+                                            and (project.supported_percent > 0)
+                                            and (project.supported_percent <= 100) %}
+                                        {% set progressBarValue = project.supported_percent %}
+                                    {% elseif (project.supported_percent is defined) 
+                                            and (project.supported_percent > 100) %}
+                                        {% set progressBarValue = 100 %}
+                                    {% else %}
+                                        {% set progressBarValue = 0 %}
+                                    {% endif %}
+                                    <div class="value" style="width:{{ progressBarValue ~ '%' }}"></div>
+                                </div>
+                                <span>{{ (project.supported_percent != NULL) ? project.supported_percent : 0 }} %</span>
+                            </div>
+                            <div class="amount_info">                
+                                <img src="{{ asset('image/icons/calc.png') }}" alt="">
+                                {{ (project.supported_amount != NULL) ? project.supported_amount : 0 }} € de 
+                                {% if (project.status in [constant('Crearock\\ProjectBundle\\Entity\\Project::BEING_SUPPORTED')]) %}
+                                    {{ (project.required_amount * 0.66)|number_format(0,',','') }}
+                                {% else %}
+                                    {{ project.required_amount }}
+                                {% endif %} €
+                            </div>
+                            <div class="days_left">
+                                {% if (project.status == 1) %}                                    
+                                    <img style="width: 28px; height: 27px;" src="{{ asset('image/icons/star1.png') }}" alt="">
+                                    En aplausómetro
+                                {% else %}
+                                    <img src="{{ asset('image/icons/clock.png') }}" alt="">
+                                    {% if (project.days_left > 1) %}    
+                                        {{ project.days_left }} días restantes
+                                    {% elseif (project.days_left) == 1 %}
+                                        Último día
+                                    {% elseif (project.days_left < 1 and project.status == 3) %}
+                                        Decidiendo
+                                    {% else %}
+                                        Finalizado
+                                    {% endif %}
+                                {% endif %}                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>    
+    <div style="margin: 30px 0">
+        <a href="{{ path('info_artists') }}" style="float: left"  class="user_type_button round_corner">
+            <span style="font-size: 26px;">Soy músico</span><br>
+            <span>¿Cómo empezar un proyecto?</<span>
+        </a>
+        <a href="{{ path('info_users') }}" style="float: right" class="user_type_button round_corner">
+            <span style="font-size: 26px;">Soy mecenas</span><br>
+            <span>¿Cómo invertir en un proyecto?</span>
+        </a>
+        <div class="clear"></div>
+    </div>
+    <h3>MÁS APLAUDIDOS</h3>
+    <hr>
+    {% for topRated in topRateds %}
+        {% include 'ProjectBundle:Project:widget.html.twig' with {'project':topRated, 'applause' : true }%}
+    {% else %} 
+        {# @CHECKME 
+            Editar el formato/texto que se mostraría si no existen proyectos aplaudidos
+        #}
+        No hay proyectos Aplaudidos
+    {% endfor %}
+    <div class="clear"></div>
+    <h3>FINALIZANDO</h3>
+    <hr>
+    {% for ending in endings %}    
+        {% include 'ProjectBundle:Project:widget.html.twig' with {'project':ending }%}
+    {% else %} 
+        {# @CHECKME 
+            Editar el formato/texto que se mostraría si no existen proyectos cerca de finalización
+        #}
+        No hay proyectos Finalizando
+    {% endfor %}
+    <div class="clear"></div>
+    <h3>CON MÁS RECAUDACIÓN</h3>
+    <hr>
+    {% for mostSupported in mostSupporteds %}    
+        {% include 'ProjectBundle:Project:widget.html.twig' with {'project':mostSupported }%}
+    {% else %} 
+        {# @CHECKME 
+            Editar el formato/texto que se mostraría si no existen proyectos con mas recaudación
+        #}
+        No hay proyectos con mas recaudación
+    {% endfor %}
+    <div class="clear"></div>    
+    <div id="pre-footer" class="round_corner width">
+        <div class="title">Crea Rock: crowdfunding para músicos (Vídeo)</div>
+        <iframe src="http://player.vimeo.com/video/50609936?title=0&amp;byline=0&amp;portrait=0&amp;color=ff000d" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+        {#<div class="round_corner">
+            Síguenos en:<br>
+            <div>
+                <a target="_blank" href="https://twitter.com/Crea_Rock" title="Síguenos en Twitter" class="tw"></a>
+                <a target="_blank" href="http://www.facebook.com/crearockestatal" title="Síguenos en Facebook" class="fb"></a>
+            </div>
+        </div>
+        <span>VIDEO SOBRE CREA ROCK</span>#}
+        <div class="clear"></div>  
+    </div>
+        
+{% endblock body  %}

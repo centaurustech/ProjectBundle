@@ -1,0 +1,195 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}{% endblock %}
+{% block description %}{{parent()}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/support.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('bundles/project/css/widget.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('bundles/project/css/reward.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+    $(function (){
+        var wrap_error = $('div.error');
+        $('#reward_table li').click(function() {
+            var radio = $(':input:radio', this);
+            if (!radio.is(':disabled')) {
+                radio.attr("checked","checked");
+            }
+        });
+        
+        $('form#support').on('submit',function (e) {
+            var error = false;
+            
+            wrap_error.html('');
+            
+            if ($('#reward_table input:radio:checked').length != 1) {
+                wrap_error.append('Selecciona una cantidad con la que apoyar el proyecto.<br>');
+                error = true;
+            }
+            if (!$('#support_terms').is(':checked')) {
+                $(wrap_error).append('Debes leer y aceptar los Términos de uso y la Política de privacidad.<br>')
+                error = true;
+            }
+            
+            if (error) {
+                $('input#support_button').before(wrap_error);
+                return false;
+            }
+            return true;
+        });
+        
+    });
+{% endblock javascript %}    
+    
+{% block body %}
+    <div class="page_info">
+        <h2>
+            <a href="{{ path('project_show', {  'user_url' : project.user_url,
+                                                    'project_url' : project.url}) }}">
+                {{ project.title }}
+            </a>
+        </h2>
+        <h4>
+            <a href="{{ path('project_category', 
+                                            { 'category' : project.category_url }) }}">
+                {{ project.category_name }}
+            </a>
+        </h4>
+    </div>
+    <hr>
+    <div id="project_info">
+        <div class="image">
+            <div class="img_project">
+                <img src="{{ asset(g_project.upload_dir ~ project.image) }}" alt="{{ project.title }}">
+                <div class="shadow"></div>
+                <div class="username">{{ project.username|capitalize }}</div>
+            </div>
+        </div>
+        <p class="info">
+            {{ project.resume }}
+        </p>
+        <div class="box_info red_gradient">
+                Recaudado: {{ (project.supported_percent) ? project.supported_percent : 0 }}%
+            <div class="percent">
+                <div class="progress_bar">
+                    {% if (project.supported_percent is defined)
+                            and (project.supported_percent > 0)
+                            and (project.supported_percent <= 100) %}
+                        {% set progressBarValue = project.supported_percent %}
+                    {% elseif (project.supported_percent is defined) 
+                            and (project.supported_percent > 100) %}
+                        {% set progressBarValue = 100 %}
+                    {% else %}
+                        {% set progressBarValue = 0 %}
+                    {% endif %}
+                    <div class="value" style="width:{{ progressBarValue ~ '%' }}"></div>
+                </div>
+            </div>
+            <div style="clear: both; margin-top: 20px; line-height: 40px;">
+                <img src="{{ asset('image/icons/calc.png') }}" alt="">
+                {{ (project.supported_amount) ? project.supported_amount : 0 }} de {{ project.required_amount }} €<br>
+                <img src="{{ asset('image/icons/clock.png') }}" alt="">
+                {{ (project.days_left > 0) ? project.days_left : 0 }} días restantes
+            </div>
+        </div>
+            
+    </div>
+    {% if not confirmed %}
+    <form id="support" action="{{ path ('project_showSupport', { 'user_url': project.user_url,
+                                                'project_url': project.url}) }}"
+            method="POST" >
+    {% endif %}
+        <table id="reward_table" style="margin-top: 50px;">
+            <tr>
+                <td>
+                    Recompensas:
+                    <div class="label_description">
+                    {% if not confirmed %}
+                        Selecciona la recompensa que prefieras y haz click en invertir para impulsar el proyecto.
+                    {% else %}
+                        Has seleccionado apoyar a la banda con la recompensa siguiente:
+                    {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <ul>
+                    {% if confirmed %}
+                        <li>
+                            <div class="amount">
+                                {{ reward.amount }}€
+                            </div>
+                            <div class="info">
+                                <span style="font-weight: bold;">{{ reward.title }}</span><br>
+                                {{ reward.description }}
+                            </div>
+                            <div class="clear"></div>
+                        </li>
+                    {% else %}
+                        {% for reward in project.rewards %}
+                            <li>
+                                {% if ( ( ( reward.maxUnits > 0 ) and 
+                                    ( reward.units < reward.maxUnits ) ) or
+                                     reward.maxUnits == 0 ) %}
+                                    {% set disabled = false %}
+                                {% else %}
+                                    {% set disabled = true %}
+                                {% endif %}
+                                <input type="radio" name="reward_id" class="radio_support" value="{{ reward.id }}" required="required"
+                                       {{ ( ( reward.id == project.support_selected ) and not disabled ) ? 'checked="checked"' : '' }}
+                                       {{  disabled ? 'disabled=disabled' : null }}
+                                >
+                                <div class="amount">
+                                    {{ reward.amount }}€
+                                </div>
+                                <div class="info">
+                                    <span style="font-weight: bold; font-size: 16px;">{{ reward.title }}</span><br>
+                                    {{ reward.description }}
+                                    <div class="support_info">
+                                        {% if (reward.maxUnits) > 0 %}
+                                            <img alt="Alert" src="{{ asset('bundles/project/image/alert.jpg') }}"
+                                                 title="¡Unidades limitadas para esta recompensa!" style="height: 15px; vertical-align: bottom; cursor: help;">
+                                        {% endif %}
+                                        {{ reward.units }} {{ reward.units == 1 ? 'vez' : 'veces' }} apoyado
+                                        {% if (reward.maxUnits) > 0 %}
+                                            (de {{ reward.maxUnits }})
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="clear"></div>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                    </ul>
+                </td>
+            </tr>
+        </table>
+        {% if confirmed %}
+            <p>
+                En caso de éxito en el proyecto, el artista al que vas a apoyar se pondrá en contacto contigo a través de correo electrónico, a la dirección de email que utilizas para iniciar sesión en Crea Rock.<br><br>
+                Para continuar con el proceso haz click en confirmar.</p>
+            {% include 'PaymentBundle:Transaction:paymentform.html.twig' with {'project':transaction }%}
+            <div class="actions">            
+                <input onclick="javascript:$('#payment_form').submit();" type="submit" value="Confirmar" class="button red_gradient">
+                <a href="{{ path ('project_show', { 'user_url': project.user_url,
+                                                    'project_url': project.url}) }}" class="button grey_gradient">Cancelar</a>
+            </div>
+        {% else %}
+            <div style="text-align: center; font-size: 12px; margin-bottom: 10px; width: 100%; color: #666;">
+                <input type="checkbox" id="support_terms" name="support[terms]" style="width: auto" value="1">
+                <label for="support_terms">He leído y acepto los <a href="{{ path('terms_use') }}" title="Términos de uso" target="_blank">Términos de uso</a><br> y la <a href="{{ path('legal_notice') }}" title="Política de privacidad" target="_blank">Política de privacidad</a>.</label><br>
+                <div class="small_text error" style="margin-top: 10px">
+                    {{ app.session.flash('error_rewards') ? app.session.flash('error_rewards') ~ '<br>' : '' }}
+                    {{ app.session.flash('error_terms') ? app.session.flash('error_terms') ~ '<br>' : '' }}
+                </div>            
+                <input type="submit" name="support_button" id="support_button" value="Invertir" class="button red_gradient authentication">
+            </div>
+        {% endif %}
+    {% if confirmed %}
+    </form>
+    {% endif %}
+{% endblock body %}

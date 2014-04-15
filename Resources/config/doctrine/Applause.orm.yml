@@ -1,0 +1,18 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/Applause.orm.yml
+Crearock\ProjectBundle\Entity\Applause:
+    type: entity
+    table: applause
+#    repositoryClass: Crearock\ProjectBundle\Repository\ProjectRepository
+    id:
+        user:
+            associationKey: true
+        project:
+            associationKey: true
+    fields:
+        created_at:
+            type: datetime
+    manyToOne:
+        user:
+            targetEntity: Crearock\UserBundle\Entity\User
+        project:
+            targetEntity: Project

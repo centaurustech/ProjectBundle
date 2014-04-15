@@ -1,0 +1,33 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}{{ (last_query) ? last_query ~ ' - ' : null }}{% endblock %}
+{% block description %}{{parent()}}{% endblock %}
+{% block keywords %}{{parent()}}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/project/css/widget.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/paginator.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+        
+{% block body %}
+    <div class="round_corner" style="padding: 10px 20px;">
+        {% if not projects and message %}
+            <span class="error">{{ message|raw }}</span>
+        {% else %}
+            Busqueda: <span style="font-weight: bold;">{{ last_query }}</span>
+        {% endif %}
+    </div>
+    
+    {% for project in projects %}
+        {% include 'ProjectBundle:Project:widget.html.twig' with {'project':project} %}
+    {% else %} 
+        {# @CHECKME 
+            Editar el formato/texto que se mostraría si no existen proyectos
+        #}
+    <div style="margin: 20px 0;">
+        No se han encontrado proyectos para la búsqueda <span style="font-weight: bold;">{{ last_query }}</span>
+    </div>
+    {% endfor %}
+    {% include '::paginator.html.twig' with {'paginator':paginator} %}
+{% endblock body %}

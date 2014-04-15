@@ -1,0 +1,70 @@
+<table id="reward_table" style="margin-top: 50px;">
+    <tr>
+        <td>
+            Recompensas:
+            <div class="label_description">
+                <span style="font-weight: bold">Consejos:</span><br>
+                <ul class="tips" style="background-image: url({{ asset('bundles/project/image/crearock-logo-gris.png') }}); 
+                    background-repeat: no-repeat; background-position: 19% 7%; padding-top: 103px;">
+                    <li>
+                        Comprométete con las recompensas.
+                    </li>
+                    <li>
+                        Incrementa bien el valor de cada una de las recompensas.
+                    </li>
+                    <li>
+                        Sé creativo.
+                    </li>
+                    <li>
+                        Planificalo y presupuéstalo bien.
+                    </li>
+                </ul>            
+            </div>
+        </td>
+        <td >
+                
+            {% set prototype = 
+                    '<div class="amount" style="text-align: left;">' ~
+                            form_widget(form.rewards.get('prototype').amount) ~ '<span>€</span>
+                    </div>
+                    <div class="info">' ~
+                        form_widget(form.rewards.get('prototype').title) ~
+                        form_widget(form.rewards.get('prototype').description) ~
+                        form_widget(form.rewards.get('prototype').limit) ~ form_label(form.rewards.get('prototype').limit) ~
+                        form_widget(form.rewards.get('prototype').max_units) ~ form_label(form.rewards.get('prototype').max_units) ~
+                    '</div>
+                    <div class="actions">
+                        <a href="#" class="delete"><img src="' ~ asset('image/icons/del.png') ~ '" alt="Eliminar"></a>
+                    </div>' %}
+     
+            <ul class="rewards" data-prototype="{{ prototype }}">
+                {% for reward in form.rewards %}
+                    <li>
+                        <div class="amount" style="text-align: left;">
+                            {{ form_widget(reward.amount) }} <span>€</span>
+                            {{ form_errors(reward.amount) }}
+                        </div>
+                        <div class="info">
+                            {{ form_widget(reward.title, { 'attr' : { 'class' : 'count' } }) }}
+                            {{ form_errors(reward.title) }}
+                            {{ form_widget(reward.description) }}
+                            {{ form_errors(reward.description) }}
+                            {% set checked = (reward.vars.value.maxUnits > 0) ? { 'checked' : true } : { } %}
+                            {{ form_widget(reward.limit, { attr : checked }) }} {{ form_label(reward.limit) }}
+                            {{ form_widget(reward.max_units) }} {{ form_label(reward.max_units) }}
+                            {{ form_errors(reward.max_units) }}
+                        </div>
+                        <div class="actions">
+                            <a href="#" class="delete"><img src="{{ asset('image/icons/del.png') }}" alt="Eliminar"></a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <a href="#" id="add_reward_button">
+                Añadir nueva recompensa
+                <img src="{{ asset('image/icons/add.png') }}" alt="Anadir">
+            </a>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,34 @@
+<div id="comentarios">
+    {% for comment in project.comments %}
+        <div class="comment-wrap">
+            <div class="user">
+                <a class="comment_id" name="{{ comment.id }}">#{{ comment.id }}</a> por
+                <a href="{{ path('user_show', {'user_url' : comment.user.url}) }}">{{ comment.user.username }}</a></div>
+{# @CHECKME
+Dar formato a la fecha #}
+            <div class="created_at">{{ comment.createdAt|date('d/m/y H:i') }}</div>
+            <div class="comment_text">{{ comment.comment|anchor()|raw|nl2br }}</div>
+            {% if is_granted('ROLE_USER') %}
+                <div class="reply" href="#">Responder</div>
+            {% endif %}
+        </div>
+    {% else %}
+        No hay comentarios.
+    {% endfor %}
+        {% if is_granted('ROLE_USER') %}
+            <form action="{{ path ('comment_new', {'user_url': project.user_url,
+                                                    'project_url': project.url}) }}"
+                    method="POST" {{ form_enctype(project.new_comment_form) }}>
+                <div id="new_comment">
+                    {{ form_widget(project.new_comment_form.comment) }}
+                    {{ form_errors(project.new_comment_form.comment) }}
+                    {{ form_rest(project.new_comment_form) }}
+                    {{ form_errors(project.new_comment_form)}}
+                    <input type="submit" value="Enviar" class="button red_gradient">
+                </div>
+            </form>
+        {% else %}
+            <a href="#" class="user_access" style="text-decoration: underline">Accede</a> a tu cuenta para comentar
+        {% endif %}
+        <div class="clear"></div>
+</div>

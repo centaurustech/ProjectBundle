@@ -1,0 +1,33 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/Applause.orm.yml
+Crearock\ProjectBundle\Entity\Support:
+    type: entity
+    table: support
+    repositoryClass: Crearock\ProjectBundle\Repository\ProjectRepository
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        created_at:
+            type: datetime
+            
+    manyToOne:
+        user:
+            targetEntity: Crearock\UserBundle\Entity\User
+            inversedBy: support
+        reward:
+            targetEntity: Reward
+            cascade: [persist]
+        transaction:
+            targetEntity: Crearock\PaymentBundle\Entity\Transaction
+            nullable: true
+            
+            
+# CHEKCME
+# AÑADIR EN USER.ORM.YML:
+#    oneToMany:
+#        support:
+#            targetEntity: Crearock\ProjectBundle\Entity\Support
+#            mappedBy: user
+#            cascade: [persist]

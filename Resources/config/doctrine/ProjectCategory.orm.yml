@@ -1,0 +1,21 @@
+# src/Crearock/ProjectBundle/Resources/config/doctrine/ProjectCategory.orm.yml
+Crearock\ProjectBundle\Entity\ProjectCategory:
+    type: entity
+    table: project_category
+    repositoryClass: Crearock\ProjectBundle\Repository\ProjectRepository
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        name:
+            type: string
+            length: 50
+            unique: true
+        url:
+            type: string
+            length: 50
+            unique: true
+        enabled:
+            type: boolean

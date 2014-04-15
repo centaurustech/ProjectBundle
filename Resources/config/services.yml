@@ -1,0 +1,18 @@
+services:
+    twig.extension.text:
+        class: Twig_Extensions_Extension_Text
+        tags:
+            - { name: twig.extension }
+    twig.extension.debug:
+        class: Twig_Extensions_Extension_Debug
+        tags:
+            - { name: twig.extension }
+    project.twig.extension:
+        class: Crearock\ProjectBundle\Extension\CommentTwigExtension
+        tags:
+            - { name: twig.extension }
+                
+    confirm_support:
+        class: Crearock\ProjectBundle\Services\SupportService
+        arguments: ['@request', '@payment.response', '@doctrine.orm.entity_manager', '@mailer', '@router', '@templating']
+        scope: request
